@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ username }}'s Cart</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>{{ username }}'s Cart</h1>
+
+    {% if cart %}
+        <ul>
+        {% for item in cart %}
+            <li>{{ item.name }} - ₹{{ item.price }}</li>
+        {% endfor %}
+        </ul>
+        <h3>Total: ₹{{ total }}</h3>
+        <a href="{{ url_for('checkout', username=username) }}" class="btn">Proceed to Checkout</a>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <br><br>
+    <a href="/">Home</a>
+</div>
+</body>
+</html>
