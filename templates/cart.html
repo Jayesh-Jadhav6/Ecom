@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ username }}'s Cart</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <title>Cart</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<div class="container">
-    <h1>{{ username }}'s Cart</h1>
+  <h2>{{ username }}'s Cart</h2>
 
-    {% if cart %}
-        <ul>
-        {% for item in cart %}
-            <li>{{ item.name }} - ₹{{ item.price }}</li>
-        {% endfor %}
-        </ul>
-        <h3>Total: ₹{{ total }}</h3>
-        <a href="{{ url_for('checkout', username=username) }}" class="btn">Proceed to Checkout</a>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
+  {% if cart %}
+    <ul>
+      {% for item in cart %}
+        <li>{{ item.name }} - ${{ item.price }}</li>
+      {% endfor %}
+    </ul>
+    <a href="{{ url_for('checkout') }}">Proceed to Checkout</a>
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
 
-    <br><br>
-    <!-- ✅ FIX: Now Home goes to the store page for this user -->
-    <a href="{{ url_for('home', username=username) }}" class="btn">Home</a>
-</div>
+  <br>
+  <a href="{{ url_for('index') }}">Continue Shopping</a> | 
+  <a href="{{ url_for('logout') }}">Logout</a>
 </body>
 </html>

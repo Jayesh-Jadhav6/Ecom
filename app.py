@@ -1,89 +1,81 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = "supersecret"
 
-# In-memory data
+# Fake user store (in memory)
 users = {}
-products = {
-    1: {"name": "Laptop", "price": 70000},
-    2: {"name": "Phone", "price": 25000},
-    3: {"name": "Headphones", "price": 3000}
-}
-orders = {}
-order_counter = 1
 
-# ----------------------------
-# Landing Page (Register First)
-# ----------------------------
-@app.route('/', methods=['GET', 'POST'])
+# Products (still hardcoded for now)
+products = [
+    {"id": 1, "name": "Laptop", "price": 500},
+    {"id": 2, "name": "Phone", "price": 200},
+    {"id": 3, "name": "Headphones", "price": 50}
+]
+
+# Cart (in session)
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
-        username = request.form.get("username")
+    if request.method == "POST":
+        username = request.form["username"]
         if username in users:
-            return render_template('register.html', error="User already exists!")
+            return "User already exists. Please login."
         users[username] = {"cart": []}
-        return redirect(url_for('home', username=username))
-    return render_template('register.html')
+        session["username"] = username
+        return redirect(url_for("index"))
+    return render_template("register.html")
 
-# ----------------------------
-# Store Page (after register)
-# ----------------------------
-@app.route('/store/<username>')
-def home(username):
-    if username not in users:
-        return redirect(url_for('register'))
-    return render_template('index.html', username=username, products=products)
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        if username in users:
+            session["username"] = username
+            return redirect(url_for("index"))
+        return "User not found. Please register first."
+    return render_template("login.html")
 
-# ----------------------------
-# Add to Cart
-# ----------------------------
-@app.route('/add_to_cart/<username>', methods=['POST'])
-def add_to_cart(username):
-    product_id = int(request.form.get("product_id"))
-    
-    if username not in users:
-        return redirect(url_for('register'))
-    if product_id not in products:
-        return f"Product not found. <a href='/store/{username}'>Go back</a>"
-    
-    users[username]["cart"].append(products[product_id])
-    return redirect(url_for('view_cart', username=username))
+@app.route("/index")
+def index():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    return render_template("index.html", products=products, username=session["username"])
 
-# ----------------------------
-# View Cart
-# ----------------------------
-@app.route('/cart/<username>')
-def view_cart(username):
-    if username not in users:
-        return redirect(url_for('register'))
+@app.route("/add_to_cart/<int:product_id>")
+def add_to_cart(product_id):
+    if "username" not in session:
+        return redirect(url_for("login"))
+    username = session["username"]
+    for product in products:
+        if product["id"] == product_id:
+            users[username]["cart"].append(product)
+    return redirect(url_for("cart"))
+
+@app.route("/cart")
+def cart():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    username = session["username"]
+    return render_template("cart.html", cart=users[username]["cart"], username=username)
+
+@app.route("/checkout")
+def checkout():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    username = session["username"]
     cart = users[username]["cart"]
-    total = sum(p["price"] for p in cart)
-    return render_template('cart.html', username=username, cart=cart, total=total)
+    total = sum(item["price"] for item in cart)
+    users[username]["cart"] = []  # empty cart after checkout
+    return render_template("checkout.html", total=total, username=username)
 
-# ----------------------------
-# Checkout Page
-# ----------------------------
-@app.route('/checkout/<username>', methods=['GET', 'POST'])
-def checkout(username):
-    global order_counter
-    if username not in users:
-        return redirect(url_for('register'))
-    cart = users[username]["cart"]
-    if not cart:
-        return f"Cart is empty. <a href='/store/{username}'>Go back</a>"
-    
-    total = sum(p["price"] for p in cart)
-    
-    if request.method == 'POST':
-        orders[order_counter] = {"user": username, "items": cart}
-        users[username]["cart"] = []
-        order_counter += 1
-        return f"Order placed successfully! <a href='/store/{username}'>Continue Shopping</a>"
-    
-    return render_template('checkout.html', username=username, cart=cart, total=total)
+@app.route("/logout")
+def logout():
+    session.pop("username", None)
+    return redirect(url_for("landing"))
 
-# ----------------------------
-# Run App
-# ----------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

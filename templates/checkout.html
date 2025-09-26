@@ -1,28 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Checkout - {{ username }}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <title>Checkout</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<div class="container">
-    <h1>Checkout for {{ username }}</h1>
+  <h2>Checkout Complete</h2>
+  <p>Thank you, {{ username }}! Your total payment is ${{ total }}.</p>
 
-    <ul>
-    {% for item in cart %}
-        <li>{{ item.name }} - ₹{{ item.price }}</li>
-    {% endfor %}
-    </ul>
-
-    <h3>Total: ₹{{ total }}</h3>
-
-    <form method="POST">
-        <input type="submit" value="Place Order" class="btn">
-    </form>
-
-    <br><br>
-    <a href="{{ url_for('view_cart', username=username) }}" class="btn">Back to Cart</a>
-    <a href="{{ url_for('home', username=username) }}" class="btn">Continue Shopping</a>
-</div>
+  <a href="{{ url_for('index') }}">Shop Again</a> | 
+  <a href="{{ url_for('logout') }}">Logout</a>
 </body>
 </html>
