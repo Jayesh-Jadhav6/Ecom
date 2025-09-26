@@ -21,7 +21,8 @@
     {% endif %}
 
     <br><br>
-    <a href="/">Home</a>
+    <!-- ✅ FIX: Now Home goes to the store page for this user -->
+    <a href="{{ url_for('home', username=username) }}" class="btn">Home</a>
 </div>
 </body>
 </html>

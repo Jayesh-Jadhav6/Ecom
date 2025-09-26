@@ -21,7 +21,8 @@
     </form>
 
     <br><br>
-    <a href="{{ url_for('view_cart', username=username) }}">Back to Cart</a>
+    <a href="{{ url_for('view_cart', username=username) }}" class="btn">Back to Cart</a>
+    <a href="{{ url_for('home', username=username) }}" class="btn">Continue Shopping</a>
 </div>
 </body>
 </html>
